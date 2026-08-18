@@ -4,7 +4,7 @@ function [result, problem] = optimize(varargin)
 % pulse sequence subject to constraints on power, maximum gradient and maximum slew rate.
 %
 % If you use this in your research, please cite the following paper:
-% Jens Sjölund, Filip Szczepankiewicz, Markus Nilsson, Daniel Topgaard, Carl-Fredrik Westin, Hans Knutsson,
+% Jens SjÃ¶lund, Filip Szczepankiewicz, Markus Nilsson, Daniel Topgaard, Carl-Fredrik Westin, Hans Knutsson,
 % "Constrained optimization of gradient waveforms for generalized diffusion encoding",
 % Journal of Magnetic Resonance, Volume 261, December 2015, Pages 157-168, ISSN 1090-7807,
 % http://dx.doi.org/10.1016/j.jmr.2015.10.012.
@@ -17,7 +17,7 @@ function [result, problem] = optimize(varargin)
 % Magn Reson Med. 2019;00:1-14. https://doi.org/10.1002/mrm.27828
 %
 %
-% Written by Jens Sjölund, jens.sjolund@elekta.com
+% Written by Jens SjÃ¶lund, jens.sjolund@elekta.com
 % Maxwell compensation by Filip Szczepankiewicz, filip.szczepankiewicz@med.lu.se
 
 %% Initialize parameters
@@ -31,10 +31,12 @@ end
 
 
 %% Set optimization parameters
+% Gradient check (barely) fails, likely for numerical reasons because 
+% errors increase with smaller step sizes than 1e-5. Therefore, 1e-4 is used.
 options = optimoptions('fmincon','Algorithm','sqp',...
-    'DerivativeCheck','off','FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', 1e-4,...% Gradient check (barely) fails, likely for numerical reasons because errors increase with smaller step sizes than 1e-5.
-    'Display','off', 'GradObj','on','GradConstr','on','MaxFunEval', ...
-    problem.MaxFunEval, 'MaxIter', problem.MaxIter, 'ScaleProblem', true);
+    'FiniteDifferenceType', 'central', 'FiniteDifferenceStepSize', 1e-4,... % Used only if gradients are not supplied; 1e-4 avoids numerical issues observed with smaller steps
+    'Display','off', 'SpecifyObjectiveGradient', true, 'SpecifyConstraintGradient', true,...
+    'MaxFunctionEvaluations', problem.MaxFunEval, 'MaxIterations', problem.MaxIter, 'ScaleProblem', true);
 warning('off', 'optimlib:fmincon:ConvertingToFull'); %Disables warning when SQP converts sparse matrices to full
 
 %% Set up constraints
